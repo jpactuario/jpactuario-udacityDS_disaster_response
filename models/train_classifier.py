@@ -19,7 +19,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 
 def load_data(database_filepath):
-    """
+    '''
     Load data from the database.
 
     Args:
@@ -29,7 +29,7 @@ def load_data(database_filepath):
         X (pd.DataFrame): features dataframe
         Y (pd.DataFrame): target dataframe
         category_names (list of string): list of target labels
-    """
+    '''
 
     engine = create_engine('sqlite:///' + str(database_filepath))
     df = pd.read_sql_table('messages', engine)
@@ -39,7 +39,7 @@ def load_data(database_filepath):
     return X, Y, category_names
 
 def tokenize(text):
-    """
+    '''
     Tokenization function to be used in training.
 
     Args:
@@ -47,7 +47,7 @@ def tokenize(text):
 
     Returns:
         tokens (list of str): tokenized and lemmatized list of words
-    """
+    '''
 
     # Remove punctuations
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
@@ -63,7 +63,7 @@ def tokenize(text):
     return tokens
 
 def build_model():
-    """
+    '''
     Initializing both the classifier model (based on Random Forest using TF-IDF
     as the features) and the grid search of the `n_estimators` parameter in
     the Random Forest.
@@ -73,7 +73,7 @@ def build_model():
 
     Returns:
         cv (GridSearchCV class): initialized GridSearchCV
-    """
+    '''
 
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
@@ -94,10 +94,27 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    Evaluate the accuracy / precision / recall / F-1 score of the models
+    by means of Classification Report
+
+    Args:
+        model: model to be evaluated
+        X_test (pd.DataFrame): testing set of the features
+        Y_test (pd.DataFrame): ground truth of the testing set
+        category_names (list of str): list of category names
+    '''
     Y_pred = pd.DataFrame(model.predict(X_test), columns=category_names)
     print(classification_report(Y_test, Y_pred))
 
 def save_model(model, model_filepath):
+    '''
+    Save the model into a pickle file.
+
+    Args:
+        model: model to be saved
+        model_filepath (str): path and filename of the model pickle
+    '''
     pickle.dump(model, open(model_filepath, 'wb'))
 
 def main():
