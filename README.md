@@ -2,7 +2,10 @@
 
 ## Summary
 
+The goal of this project is to build a web application to classify a message into categories that aid workers can work on e.g.
+whether the sender is requesting for assistance and, if so, on which domain e.g. water, shelter, food, clothing, etc.
 
+The labelled data was provided by Figure Eight.
 
 ## Execution
 
@@ -68,3 +71,10 @@ This program requires the following python packages:
 ![Screenshot Entering Message](/images/message_input.png)
 
 * Classification result:
+
+![Screenshot of Classification Result](/images/classification_result.png)
+
+* Training data visualization:
+
+![Training data visualization 1](/images/training_visual1.png)
+![Training data visualization 2](/images/training_visual2.png)
