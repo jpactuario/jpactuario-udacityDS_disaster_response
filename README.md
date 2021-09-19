@@ -60,3 +60,11 @@ This program requires the following python packages:
 3. Launching the web application:
 
    Go to http://0.0.0.0:3001/
+
+## Sample Screenshots
+
+* Entering a message:
+
+![Screenshot Entering Message](/images/message_input.png)
+
+* Classification result:

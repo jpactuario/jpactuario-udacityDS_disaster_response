@@ -15,6 +15,16 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
+    '''
+    Tokenization function to be used in the ML pipeline.
+
+    Args:
+        text (str): string before tokenization
+
+    Returns:
+        tokens (list of str): tokenized and lemmatized list of words
+    '''
+
 
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()

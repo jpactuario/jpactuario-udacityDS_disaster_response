@@ -40,7 +40,7 @@ def load_data(database_filepath):
 
 def tokenize(text):
     '''
-    Tokenization function to be used in training.
+    Tokenization function to be used in the ML pipeline.
 
     Args:
         text (str): string before tokenization
