@@ -1,20 +1,21 @@
 import json
 import plotly
 import pandas as pd
+import numpy as np
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+import plotly.graph_objs as pl_go
 import joblib
 from sqlalchemy import create_engine
-
 
 app = Flask(__name__)
 
 def tokenize(text):
+
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -38,40 +39,55 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/index')
 def index():
 
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
+    # Extract data needed for visuals
+
+    # 1) Extract list of categories & sum up the number of messages by category
+    df_summary = df[df.columns[4:]].sum().sort_values()
+    categories_names = df_summary.index.tolist()
+    message_count = df_summary.tolist()
+
+    # 2) Extract the length of messages
+    message_lengths = df.message.str.len().tolist()
+
+    # capping the length at 99th percentile to truncate the tail,
+    # making the histogram visualization easier to see.
+    message_length_99p = int(np.percentile(message_lengths, 99))
+    message_lengths_capped = np.minimum(message_lengths, message_length_99p)
 
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
 
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
-    ]
+    graph_one = []
+    trace_one = pl_go.Bar(x=message_count, y=categories_names,
+                        orientation='h')
+    graph_one.append(trace_one)
+    layout_one = {
+                  'title': 'Count of messages by Response Type',
+                  'xaxis': dict(title = 'Message Count'),
+                  'height': 1000
+                 }
+
+    graph_two = []
+    trace_two = pl_go.Histogram(x=message_lengths_capped)
+    graph_two.append(trace_two)
+    layout_two = {
+                  'title': 'Histogram of Message Length (capped at {})'.format(
+                    message_length_99p
+                  ),
+                  'xaxis': dict(title = 'Message Length')
+                 }
+
+    # compiling all visuals
+
+    figures = []
+    figures.append(dict(data=graph_one, layout=layout_one))
+    figures.append(dict(data=graph_two, layout=layout_two))
 
     # encode plotly graphs in JSON
-    ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
-    graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+    ids = ["graph-{}".format(i) for i, _ in enumerate(figures)]
+    figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
 
     # render web page with plotly graphs
-    return render_template('master.html', ids=ids, graphJSON=graphJSON)
+    return render_template('master.html', ids=ids, figuresJSON=figuresJSON)
 
 
 # web page that handles user query and displays model results
